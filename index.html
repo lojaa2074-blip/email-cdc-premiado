@@ -46,7 +46,7 @@
     background:var(--verde);
   }
   main{
-    max-width:1200px;
+    max-width:640px;
     margin:0 auto;
     padding:28px 20px 60px;
     display:grid;
@@ -58,12 +58,6 @@
     display:flex;
     flex-direction:column;
     gap:24px;
-  }
-  @media (min-width:920px){
-    main{
-      grid-template-columns:1fr 1fr;
-      align-items:start;
-    }
   }
   .card{
     background:var(--branco);
@@ -217,31 +211,16 @@
       </div>
     </div>
 
+    <label for="destinatario">Destinatário (opcional)</label>
+    <input type="text" id="destinatario" placeholder="nome@vwfs.com">
+
     <label for="cnpjdata">Dados do cartão CNPJ (cole aqui)</label>
     <textarea id="cnpjdata" placeholder="Cole o texto do Comprovante de Inscrição e de Situação Cadastral..."></textarea>
     <div class="hint">Reconhece automaticamente: DATA DE ABERTURA, NOME EMPRESARIAL, TÍTULO DO ESTABELECIMENTO, LOGRADOURO, NÚMERO, BAIRRO/DISTRITO, MUNICÍPIO e UF.</div>
 
-    <button class="btn-primary" onclick="gerarTexto()">Gerar texto de recomendação</button>
+    <button class="btn-primary" onclick="enviarEmail()">✉ Enviar e-mail</button>
     <div class="status" id="status"></div>
   </section>
-
-  <div class="output-col">
-    <section class="card">
-      <h2><span class="dot"></span>Título (assunto do e-mail)</h2>
-      <div class="output-actions">
-        <button class="btn-secondary" onclick="copiarTitulo()">Copiar título</button>
-      </div>
-      <div id="titulo" class="empty titulo-box">O título aparecerá aqui após você gerar o texto.</div>
-    </section>
-
-    <section class="card">
-      <h2><span class="dot"></span>Texto gerado</h2>
-      <div class="output-actions">
-        <button class="btn-secondary" onclick="copiarTexto()">Copiar texto</button>
-      </div>
-      <div id="output" class="empty">O texto gerado aparecerá aqui após você preencher os dados e clicar em "Gerar texto de recomendação".</div>
-    </section>
-  </div>
 </main>
 
 <footer>Ferramenta interna &middot; Car Bank</footer>
@@ -285,18 +264,17 @@ function calcularTempoMercado(dataAbertura){
   return { anos: Math.max(anos, 0), anoAbertura: partes[3] };
 }
 
-function gerarTexto(){
+function montarConteudo(){
   const status = document.getElementById('status');
-  const output = document.getElementById('output');
   const produto = document.getElementById('produto').value.trim() || 'CDC Premiado';
   const dn = document.getElementById('dn').value.trim();
   const fantasiaManual = document.getElementById('fantasia').value.trim();
   const bruto = document.getElementById('cnpjdata').value;
 
   if (!bruto.trim()){
-    status.textContent = 'Cole os dados do cartão CNPJ antes de gerar o texto.';
+    status.textContent = 'Cole os dados do cartão CNPJ antes de enviar.';
     status.className = 'status warn';
-    return;
+    return null;
   }
 
   const dataAbertura = extrairCampo(bruto, ['DATA DE ABERTURA']);
@@ -311,10 +289,9 @@ function gerarTexto(){
   if (!dataAbertura || !nomeEmpresarial || !logradouro){
     status.textContent = 'Não consegui identificar todos os campos (data de abertura, nome empresarial e logradouro são obrigatórios). Confira o texto colado.';
     status.className = 'status warn';
-    return;
+    return null;
   }
 
-  const nomeLoja = fantasiaManual || tituloEstabelecimento || capitalizarNome(nomeEmpresarial);
   const nomeLojaCompleto = nomeEmpresarial.toUpperCase();
   const tempo = calcularTempoMercado(dataAbertura);
   const anosTexto = tempo ? `${tempo.anos} ano${tempo.anos === 1 ? '' : 's'}` : '';
@@ -337,52 +314,28 @@ Além disso, a loja conta com veículos de ótima qualidade e uma carteira de cl
 
 Diante do histórico da loja, do tempo de mercado e do potencial de crescimento da parceria, entendemos que a ${nomeLojaCompleto} reúne os requisitos necessários para recomendação nesta operação no produto ${produto}.`;
 
-  output.textContent = texto;
-  output.classList.remove('empty');
+  const titulo = `Recomendação de Operação – ${produto} – ${nomeLojaCompleto}${dnTexto}`;
 
-  const tituloEl = document.getElementById('titulo');
-  const titulo = `Recomendação de Operação – ${produto} – ${nomeLojaCompleto}${dn ? ` (DN ${dn})` : ''}`;
-  tituloEl.textContent = titulo;
-  tituloEl.classList.remove('empty');
+  return { titulo, texto };
+}
 
-  status.textContent = 'Texto gerado com sucesso.';
+function enviarEmail(){
+  const status = document.getElementById('status');
+  const conteudo = montarConteudo();
+  if (!conteudo) return;
+
+  const destinatario = document.getElementById('destinatario').value.trim();
+  const corpoFormatado = conteudo.texto.replace(/\n/g, '\r\n');
+
+  const link = `mailto:${encodeURIComponent(destinatario)}?subject=${encodeURIComponent(conteudo.titulo)}&body=${encodeURIComponent(corpoFormatado)}`;
+
+  window.location.href = link;
+
+  status.textContent = 'Abrindo seu cliente de e-mail com o título e o texto preenchidos...';
   status.className = 'status ok';
 }
-
-function copiarTitulo(){
-  const tituloEl = document.getElementById('titulo');
-  const status = document.getElementById('status');
-  if (tituloEl.classList.contains('empty')){
-    status.textContent = 'Gere o texto antes de copiar o título.';
-    status.className = 'status warn';
-    return;
-  }
-  navigator.clipboard.writeText(tituloEl.textContent).then(() => {
-    status.textContent = 'Título copiado para a área de transferência!';
-    status.className = 'status ok';
-  }).catch(() => {
-    status.textContent = 'Não foi possível copiar automaticamente. Selecione e copie manualmente.';
-    status.className = 'status warn';
-  });
-}
-
-function copiarTexto(){
-  const output = document.getElementById('output');
-  const status = document.getElementById('status');
-  if (output.classList.contains('empty')){
-    status.textContent = 'Gere o texto antes de copiar.';
-    status.className = 'status warn';
-    return;
-  }
-  navigator.clipboard.writeText(output.textContent).then(() => {
-    status.textContent = 'Texto copiado para a área de transferência!';
-    status.className = 'status ok';
-  }).catch(() => {
-    status.textContent = 'Não foi possível copiar automaticamente. Selecione e copie manualmente.';
-    status.className = 'status warn';
-  });
-}
 </script>
+
 
 </body>
 </html>
