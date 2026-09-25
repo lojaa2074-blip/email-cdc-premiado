@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gerador de Recomendação de Operação</title>
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --verde:#46da86;
+    --azul:#111741;
+    --azul-escuro:#142037;
+    --branco:#ffffff;
+    --cinza-claro:#f3f5fa;
+    --cinza-borda:#d9deea;
+    --texto-suave:#5a6478;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Poppins',sans-serif;
+    background:var(--cinza-claro);
+    color:var(--azul-escuro);
+  }
+  header{
+    background:linear-gradient(135deg,var(--azul-escuro),var(--azul));
+    color:var(--branco);
+    padding:28px 32px;
+  }
+  header h1{
+    margin:0 0 4px;
+    font-size:22px;
+    font-weight:600;
+  }
+  header p{
+    margin:0;
+    font-size:13px;
+    color:#c9d0e6;
+  }
+  .accent-bar{
+    height:4px;
+    background:var(--verde);
+  }
+  main{
+    max-width:1200px;
+    margin:0 auto;
+    padding:28px 20px 60px;
+    display:grid;
+    grid-template-columns:1fr;
+    gap:24px;
+  }
+  @media (min-width:920px){
+    main{
+      grid-template-columns:1fr 1fr;
+      align-items:start;
+    }
+  }
+  .card{
+    background:var(--branco);
+    border:1px solid var(--cinza-borda);
+    border-radius:14px;
+    padding:24px;
+    box-shadow:0 2px 10px rgba(17,23,65,0.05);
+  }
+  .card h2{
+    margin:0 0 18px;
+    font-size:16px;
+    font-weight:600;
+    color:var(--azul);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .card h2 .dot{
+    width:8px;height:8px;border-radius:50%;background:var(--verde);display:inline-block;
+  }
+  label{
+    display:block;
+    font-size:12.5px;
+    font-weight:500;
+    color:var(--texto-suave);
+    margin:14px 0 6px;
+  }
+  label:first-of-type{margin-top:0;}
+  input[type=text], textarea{
+    width:100%;
+    border:1.5px solid var(--cinza-borda);
+    border-radius:9px;
+    padding:10px 12px;
+    font-family:'Poppins',sans-serif;
+    font-size:13.5px;
+    color:var(--azul-escuro);
+    background:var(--cinza-claro);
+    resize:vertical;
+    transition:border-color .15s;
+  }
+  input[type=text]:focus, textarea:focus{
+    outline:none;
+    border-color:var(--verde);
+    background:var(--branco);
+  }
+  textarea{
+    min-height:190px;
+    line-height:1.5;
+  }
+  .row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+  .hint{
+    font-size:11.5px;
+    color:var(--texto-suave);
+    margin-top:4px;
+  }
+  button{
+    font-family:'Poppins',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    border:none;
+    border-radius:9px;
+    padding:13px 18px;
+    cursor:pointer;
+    transition:filter .15s, transform .1s;
+  }
+  button:active{transform:scale(0.98);}
+  .btn-primary{
+    background:var(--verde);
+    color:var(--azul-escuro);
+    width:100%;
+    margin-top:20px;
+  }
+  .btn-primary:hover{filter:brightness(1.05);}
+  .btn-secondary{
+    background:var(--azul);
+    color:var(--branco);
+  }
+  .btn-secondary:hover{filter:brightness(1.15);}
+  .output-actions{
+    display:flex;
+    gap:10px;
+    margin-bottom:14px;
+  }
+  #output{
+    white-space:pre-wrap;
+    font-size:14px;
+    line-height:1.75;
+    color:var(--azul-escuro);
+    background:var(--cinza-claro);
+    border:1.5px dashed var(--cinza-borda);
+    border-radius:10px;
+    padding:18px;
+    min-height:260px;
+  }
+  #output.empty, .titulo-box.empty{
+    color:var(--texto-suave);
+    font-style:italic;
+  }
+  .titulo-box{
+    font-size:14.5px;
+    font-weight:600;
+    color:var(--azul);
+    background:var(--cinza-claro);
+    border:1.5px dashed var(--cinza-borda);
+    border-radius:10px;
+    padding:16px 18px;
+  }
+  .status{
+    font-size:12px;
+    margin-top:10px;
+    min-height:16px;
+    font-weight:500;
+  }
+  .status.ok{color:#1c9a5e;}
+  .status.warn{color:#b8860b;}
+  footer{
+    text-align:center;
+    font-size:11.5px;
+    color:var(--texto-suave);
+    padding:20px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Gerador de Recomendação de Operação</h1>
+  <p>Cole os dados do cartão CNPJ e monte o texto de recomendação padronizado</p>
+</header>
+<div class="accent-bar"></div>
+
+<main>
+  <section class="card">
+    <h2><span class="dot"></span>Dados da operação</h2>
+
+    <label for="produto">Produto</label>
+    <input type="text" id="produto" value="CDC Premiado">
+
+    <div class="row">
+      <div>
+        <label for="dn">DN (código da loja)</label>
+        <input type="text" id="dn" placeholder="Ex: 60904">
+      </div>
+      <div>
+        <label for="fantasia">Nome fantasia (opcional)</label>
+        <input type="text" id="fantasia" placeholder="Preenche automático se vazio">
+      </div>
+    </div>
+
+    <label for="cnpjdata">Dados do cartão CNPJ (cole aqui)</label>
+    <textarea id="cnpjdata" placeholder="Cole o texto do Comprovante de Inscrição e de Situação Cadastral..."></textarea>
+    <div class="hint">Reconhece automaticamente: DATA DE ABERTURA, NOME EMPRESARIAL, TÍTULO DO ESTABELECIMENTO, LOGRADOURO, NÚMERO, BAIRRO/DISTRITO, MUNICÍPIO e UF.</div>
+
+    <button class="btn-primary" onclick="gerarTexto()">Gerar texto de recomendação</button>
+    <div class="status" id="status"></div>
+  </section>
+
+  <section class="card">
+    <h2><span class="dot"></span>Título (assunto do e-mail)</h2>
+    <div class="output-actions">
+      <button class="btn-secondary" onclick="copiarTitulo()">Copiar título</button>
+    </div>
+    <div id="titulo" class="empty titulo-box">O título aparecerá aqui após você gerar o texto.</div>
+  </section>
+
+  <section class="card">
+    <h2><span class="dot"></span>Texto gerado</h2>
+    <div class="output-actions">
+      <button class="btn-secondary" onclick="copiarTexto()">Copiar texto</button>
+    </div>
+    <div id="output" class="empty">O texto gerado aparecerá aqui após você preencher os dados e clicar em "Gerar texto de recomendação".</div>
+  </section>
+</main>
+
+<footer>Ferramenta interna &middot; Car Bank</footer>
+
+<script>
+function extrairCampo(texto, rotulos){
+  const linhas = texto.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  for (const rotulo of rotulos){
+    const idx = linhas.findIndex(l => l.toUpperCase() === rotulo.toUpperCase() || l.toUpperCase().startsWith(rotulo.toUpperCase()));
+    if (idx !== -1 && idx + 1 < linhas.length){
+      let valor = linhas[idx + 1];
+      // evita pegar outro rótulo em sequência
+      if (!/^[A-ZÀ-Ú\/\s()]+$/.test(valor) || valor.length < 40){
+        return valor;
+      }
+    }
+  }
+  return '';
+}
+
+function capitalizarNome(nome){
+  const minusculas = ['de','da','do','das','dos','e','ltda','me','epp'];
+  return nome.toLowerCase().split(' ').map((p,i) => {
+    if (minusculas.includes(p) && i !== 0) return p;
+    if (p.toUpperCase() === p && p.length <= 4 && /^[A-Z]+$/i.test(p) && !['ltda','epp','me'].includes(p)) {
+      // mantém siglas curtas tipo EPP, ME, LTDA como estão (maiúsculas)
+    }
+    return p.charAt(0).toUpperCase() + p.slice(1);
+  }).join(' ').replace(/\bLtda\b/gi,'LTDA').replace(/\bMe\b/g,'ME').replace(/\bEpp\b/gi,'EPP');
+}
+
+function calcularTempoMercado(dataAbertura){
+  const partes = dataAbertura.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+  if (!partes) return null;
+  const dataAb = new Date(parseInt(partes[3]), parseInt(partes[2]) - 1, parseInt(partes[1]));
+  const hoje = new Date();
+  let anos = hoje.getFullYear() - dataAb.getFullYear();
+  const aindaNaoFezAniversario = (hoje.getMonth() < dataAb.getMonth()) ||
+    (hoje.getMonth() === dataAb.getMonth() && hoje.getDate() < dataAb.getDate());
+  if (aindaNaoFezAniversario) anos -= 1;
+  return { anos: Math.max(anos, 0), anoAbertura: partes[3] };
+}
+
+function gerarTexto(){
+  const status = document.getElementById('status');
+  const output = document.getElementById('output');
+  const produto = document.getElementById('produto').value.trim() || 'CDC Premiado';
+  const dn = document.getElementById('dn').value.trim();
+  const fantasiaManual = document.getElementById('fantasia').value.trim();
+  const bruto = document.getElementById('cnpjdata').value;
+
+  if (!bruto.trim()){
+    status.textContent = 'Cole os dados do cartão CNPJ antes de gerar o texto.';
+    status.className = 'status warn';
+    return;
+  }
+
+  const dataAbertura = extrairCampo(bruto, ['DATA DE ABERTURA']);
+  const nomeEmpresarial = extrairCampo(bruto, ['NOME EMPRESARIAL']);
+  const tituloEstabelecimento = extrairCampo(bruto, ['TÍTULO DO ESTABELECIMENTO (NOME DE FANTASIA)', 'TITULO DO ESTABELECIMENTO']);
+  const logradouro = extrairCampo(bruto, ['LOGRADOURO']);
+  const numero = extrairCampo(bruto, ['NÚMERO', 'NUMERO']);
+  const bairro = extrairCampo(bruto, ['BAIRRO/DISTRITO', 'BAIRRO']);
+  const municipio = extrairCampo(bruto, ['MUNICÍPIO', 'MUNICIPIO']);
+  const uf = extrairCampo(bruto, ['UF']);
+
+  if (!dataAbertura || !nomeEmpresarial || !logradouro){
+    status.textContent = 'Não consegui identificar todos os campos (data de abertura, nome empresarial e logradouro são obrigatórios). Confira o texto colado.';
+    status.className = 'status warn';
+    return;
+  }
+
+  const nomeLoja = fantasiaManual || tituloEstabelecimento || capitalizarNome(nomeEmpresarial);
+  const nomeLojaCompleto = nomeEmpresarial.toUpperCase();
+  const tempo = calcularTempoMercado(dataAbertura);
+  const anosTexto = tempo ? `${tempo.anos} ano${tempo.anos === 1 ? '' : 's'}` : '';
+  const enderecoPartes = [
+    [logradouro, numero].filter(Boolean).join(', '),
+    bairro,
+    [municipio, uf].filter(Boolean).join('/')
+  ].filter(Boolean).join(' - ');
+
+  const dnTexto = dn ? ` (DN ${dn})` : '';
+
+  const texto =
+`Recomendamos a operação para o produto ${produto} na loja ${nomeLojaCompleto}${dnTexto}, considerando o potencial comercial.
+
+A loja possui CNPJ ativo desde ${tempo ? tempo.anoAbertura : dataAbertura}${anosTexto ? ` (${anosTexto} de mercado)` : ''}, demonstrando estabilidade e continuidade de suas atividades no mercado de veículos seminovos e usados. Está localizada em ponto estratégico e de grande movimento, na ${enderecoPartes}, o que reforça a visibilidade e o potencial de geração de negócios do estabelecimento.
+
+A implementação do ${produto} representa uma excelente oportunidade para fortalecermos nossa presença na operação. Com o aumento da participação do banco na loja, teremos condições de ampliar o volume de produção, elevar nosso share de participação, melhorar a qualidade das operações originadas e oferecer um diferencial competitivo relevante aos clientes.
+
+Além disso, a loja conta com veículos de ótima qualidade e uma carteira de clientes fidelizados, o que fortalece ainda mais a confiança na parceria.
+
+Diante do histórico da loja, do tempo de mercado e do potencial de crescimento da parceria, entendemos que a ${nomeLojaCompleto} reúne os requisitos necessários para recomendação nesta operação no produto ${produto}.`;
+
+  output.textContent = texto;
+  output.classList.remove('empty');
+
+  const tituloEl = document.getElementById('titulo');
+  const titulo = `Recomendação de Operação – ${produto} – ${nomeLojaCompleto}${dn ? ` (DN ${dn})` : ''}`;
+  tituloEl.textContent = titulo;
+  tituloEl.classList.remove('empty');
+
+  status.textContent = 'Texto gerado com sucesso.';
+  status.className = 'status ok';
+}
+
+function copiarTitulo(){
+  const tituloEl = document.getElementById('titulo');
+  const status = document.getElementById('status');
+  if (tituloEl.classList.contains('empty')){
+    status.textContent = 'Gere o texto antes de copiar o título.';
+    status.className = 'status warn';
+    return;
+  }
+  navigator.clipboard.writeText(tituloEl.textContent).then(() => {
+    status.textContent = 'Título copiado para a área de transferência!';
+    status.className = 'status ok';
+  }).catch(() => {
+    status.textContent = 'Não foi possível copiar automaticamente. Selecione e copie manualmente.';
+    status.className = 'status warn';
+  });
+}
+
+function copiarTexto(){
+  const output = document.getElementById('output');
+  const status = document.getElementById('status');
+  if (output.classList.contains('empty')){
+    status.textContent = 'Gere o texto antes de copiar.';
+    status.className = 'status warn';
+    return;
+  }
+  navigator.clipboard.writeText(output.textContent).then(() => {
+    status.textContent = 'Texto copiado para a área de transferência!';
+    status.className = 'status ok';
+  }).catch(() => {
+    status.textContent = 'Não foi possível copiar automaticamente. Selecione e copie manualmente.';
+    status.className = 'status warn';
+  });
+}
+</script>
+
+</body>
+</html>
