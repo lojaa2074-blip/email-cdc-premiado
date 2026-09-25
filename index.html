@@ -52,6 +52,12 @@
     display:grid;
     grid-template-columns:1fr;
     gap:24px;
+    align-items:start;
+  }
+  .output-col{
+    display:flex;
+    flex-direction:column;
+    gap:24px;
   }
   @media (min-width:920px){
     main{
@@ -219,21 +225,23 @@
     <div class="status" id="status"></div>
   </section>
 
-  <section class="card">
-    <h2><span class="dot"></span>Título (assunto do e-mail)</h2>
-    <div class="output-actions">
-      <button class="btn-secondary" onclick="copiarTitulo()">Copiar título</button>
-    </div>
-    <div id="titulo" class="empty titulo-box">O título aparecerá aqui após você gerar o texto.</div>
-  </section>
+  <div class="output-col">
+    <section class="card">
+      <h2><span class="dot"></span>Título (assunto do e-mail)</h2>
+      <div class="output-actions">
+        <button class="btn-secondary" onclick="copiarTitulo()">Copiar título</button>
+      </div>
+      <div id="titulo" class="empty titulo-box">O título aparecerá aqui após você gerar o texto.</div>
+    </section>
 
-  <section class="card">
-    <h2><span class="dot"></span>Texto gerado</h2>
-    <div class="output-actions">
-      <button class="btn-secondary" onclick="copiarTexto()">Copiar texto</button>
-    </div>
-    <div id="output" class="empty">O texto gerado aparecerá aqui após você preencher os dados e clicar em "Gerar texto de recomendação".</div>
-  </section>
+    <section class="card">
+      <h2><span class="dot"></span>Texto gerado</h2>
+      <div class="output-actions">
+        <button class="btn-secondary" onclick="copiarTexto()">Copiar texto</button>
+      </div>
+      <div id="output" class="empty">O texto gerado aparecerá aqui após você preencher os dados e clicar em "Gerar texto de recomendação".</div>
+    </section>
+  </div>
 </main>
 
 <footer>Ferramenta interna &middot; Car Bank</footer>
@@ -319,7 +327,7 @@ function gerarTexto(){
   const dnTexto = dn ? ` (DN ${dn})` : '';
 
   const texto =
-`Recomendamos a operação para o produto ${produto} na loja ${nomeLojaCompleto}${dnTexto}, considerando o potencial comercial.
+`Solicito recomendação para a operação do produto ${produto} na loja ${nomeLojaCompleto}${dnTexto}, considerando o potencial comercial.
 
 A loja possui CNPJ ativo desde ${tempo ? tempo.anoAbertura : dataAbertura}${anosTexto ? ` (${anosTexto} de mercado)` : ''}, demonstrando estabilidade e continuidade de suas atividades no mercado de veículos seminovos e usados. Está localizada em ponto estratégico e de grande movimento, na ${enderecoPartes}, o que reforça a visibilidade e o potencial de geração de negócios do estabelecimento.
 
