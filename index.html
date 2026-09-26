@@ -206,8 +206,8 @@
         <input type="text" id="dn" placeholder="Ex: 60904">
       </div>
       <div>
-        <label for="fantasia">Nome fantasia (opcional)</label>
-        <input type="text" id="fantasia" placeholder="Preenche automático se vazio">
+        <label for="proposta">Número da proposta</label>
+        <input type="text" id="proposta" placeholder="Ex: 123456">
       </div>
     </div>
 
@@ -268,7 +268,7 @@ function montarConteudo(){
   const status = document.getElementById('status');
   const produto = document.getElementById('produto').value.trim() || 'CDC Premiado';
   const dn = document.getElementById('dn').value.trim();
-  const fantasiaManual = document.getElementById('fantasia').value.trim();
+  const proposta = document.getElementById('proposta').value.trim();
   const bruto = document.getElementById('cnpjdata').value;
 
   if (!bruto.trim()){
@@ -302,9 +302,10 @@ function montarConteudo(){
   ].filter(Boolean).join(' - ');
 
   const dnTexto = dn ? ` (DN ${dn})` : '';
+  const propostaTexto = proposta ? `, referente à proposta ${proposta},` : ',';
 
   const texto =
-`Solicito recomendação para a operação do produto ${produto} na loja ${nomeLojaCompleto}${dnTexto}, considerando o potencial comercial.
+`Solicito recomendação para a operação do produto ${produto} na loja ${nomeLojaCompleto}${dnTexto}${propostaTexto} considerando o potencial comercial.
 
 A loja possui CNPJ ativo desde ${tempo ? tempo.anoAbertura : dataAbertura}${anosTexto ? ` (${anosTexto} de mercado)` : ''}, demonstrando estabilidade e continuidade de suas atividades no mercado de veículos seminovos e usados. Está localizada em ponto estratégico e de grande movimento, na ${enderecoPartes}, o que reforça a visibilidade e o potencial de geração de negócios do estabelecimento.
 
@@ -314,7 +315,7 @@ Além disso, a loja conta com veículos de ótima qualidade e uma carteira de cl
 
 Diante do histórico da loja, do tempo de mercado e do potencial de crescimento da parceria, entendemos que a ${nomeLojaCompleto} reúne os requisitos necessários para recomendação nesta operação no produto ${produto}.`;
 
-  const titulo = `Recomendação de Operação – ${produto} – ${nomeLojaCompleto}${dnTexto}`;
+  const titulo = `Recomendação${proposta ? ` – Proposta ${proposta}` : ''} – ${produto}`;
 
   return { titulo, texto };
 }
