@@ -188,8 +188,7 @@
 <body>
 
 <header>
-  <h1>Gerador de Recomendação de Operação</h1>
-  <p>Cole os dados do cartão CNPJ e monte o texto de recomendação padronizado</p>
+  <h1>CDC Premiado - Solicitação por E-mail</h1>
 </header>
 <div class="accent-bar"></div>
 
@@ -203,27 +202,24 @@
     <div class="row">
       <div>
         <label for="dn">DN (código da loja)</label>
-        <input type="text" id="dn" placeholder="Ex: 60904">
+        <input type="text" id="dn">
       </div>
       <div>
         <label for="proposta">Número da proposta</label>
-        <input type="text" id="proposta" placeholder="Ex: 123456">
+        <input type="text" id="proposta">
       </div>
     </div>
 
     <label for="destinatario">Destinatário (opcional)</label>
-    <input type="text" id="destinatario" placeholder="nome@vwfs.com">
+    <input type="text" id="destinatario">
 
     <label for="cnpjdata">Dados do cartão CNPJ (cole aqui)</label>
-    <textarea id="cnpjdata" placeholder="Cole o texto do Comprovante de Inscrição e de Situação Cadastral..."></textarea>
-    <div class="hint">Reconhece automaticamente: DATA DE ABERTURA, NOME EMPRESARIAL, TÍTULO DO ESTABELECIMENTO, LOGRADOURO, NÚMERO, BAIRRO/DISTRITO, MUNICÍPIO e UF.</div>
+    <textarea id="cnpjdata"></textarea>
 
     <button class="btn-primary" onclick="enviarEmail()">✉ Enviar e-mail</button>
     <div class="status" id="status"></div>
   </section>
 </main>
-
-<footer>Ferramenta interna &middot; Car Bank</footer>
 
 <script>
 function extrairCampo(texto, rotulos){
@@ -315,7 +311,8 @@ Além disso, a loja conta com veículos de ótima qualidade e uma carteira de cl
 
 Diante do histórico da loja, do tempo de mercado e do potencial de crescimento da parceria, entendemos que a ${nomeLojaCompleto} reúne os requisitos necessários para recomendação nesta operação no produto ${produto}.`;
 
-  const titulo = `Recomendação${proposta ? ` – Proposta ${proposta}` : ''} – ${produto}`;
+  const propostaSegmento = proposta ? `Proposta ${proposta} - ` : '';
+  const titulo = `Recomendação – ${produto} | ${propostaSegmento}${nomeLojaCompleto}${dnTexto}`;
 
   return { titulo, texto };
 }
