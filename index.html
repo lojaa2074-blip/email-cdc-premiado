@@ -222,17 +222,30 @@
 </main>
 
 <script>
+function normalizar(s){
+  return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/\s+/g,' ').trim();
+}
+
 function extrairCampo(texto, rotulos){
-  const linhas = texto.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-  for (const rotulo of rotulos){
-    const idx = linhas.findIndex(l => l.toUpperCase() === rotulo.toUpperCase() || l.toUpperCase().startsWith(rotulo.toUpperCase()));
-    if (idx !== -1 && idx + 1 < linhas.length){
-      let valor = linhas[idx + 1];
-      // evita pegar outro rótulo em sequência
-      if (!/^[A-ZÀ-Ú\/\s()]+$/.test(valor) || valor.length < 40){
-        return valor;
-      }
-    }
+  const linhas = texto.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+  const linhasNorm = linhas.map(normalizar);
+  const rotulosNorm = rotulos.map(normalizar);
+  const pegarValor = (idx) => {
+    if (idx === -1 || idx + 1 >= linhas.length) return '';
+    const valor = linhas[idx + 1];
+    // evita pegar outro rótulo em sequência
+    if (!/^[A-ZÀ-Ú\/\s()]+$/.test(valor) || valor.length < 40) return valor;
+    return '';
+  };
+  // 1º: correspondência exata (evita que "NÚMERO" case com "NÚMERO DE INSCRIÇÃO")
+  for (const r of rotulosNorm){
+    const v = pegarValor(linhasNorm.findIndex(l => l === r));
+    if (v) return v;
+  }
+  // 2º: linha que começa com o rótulo
+  for (const r of rotulosNorm){
+    const v = pegarValor(linhasNorm.findIndex(l => l.startsWith(r)));
+    if (v) return v;
   }
   return '';
 }
@@ -273,17 +286,17 @@ function montarConteudo(){
     return null;
   }
 
-  const dataAbertura = extrairCampo(bruto, ['DATA DE ABERTURA']);
+  const dataAbertura = extrairCampo(bruto, ['DATA DE ABERTURA', 'DATA DE INSCRIÇÃO NO CNPJ', 'DATA DE CONSTITUIÇÃO']);
   const nomeEmpresarial = extrairCampo(bruto, ['NOME EMPRESARIAL']);
-  const tituloEstabelecimento = extrairCampo(bruto, ['TÍTULO DO ESTABELECIMENTO (NOME DE FANTASIA)', 'TITULO DO ESTABELECIMENTO']);
+  const tituloEstabelecimento = extrairCampo(bruto, ['TÍTULO DO ESTABELECIMENTO (NOME DE FANTASIA)', 'TÍTULO DO ESTABELECIMENTO']);
   const logradouro = extrairCampo(bruto, ['LOGRADOURO']);
-  const numero = extrairCampo(bruto, ['NÚMERO', 'NUMERO']);
+  const numero = extrairCampo(bruto, ['NÚMERO']);
   const bairro = extrairCampo(bruto, ['BAIRRO/DISTRITO', 'BAIRRO']);
-  const municipio = extrairCampo(bruto, ['MUNICÍPIO', 'MUNICIPIO']);
+  const municipio = extrairCampo(bruto, ['MUNICÍPIO']);
   const uf = extrairCampo(bruto, ['UF']);
 
   if (!dataAbertura || !nomeEmpresarial || !logradouro){
-    status.textContent = 'Não consegui identificar todos os campos (data de abertura, nome empresarial e logradouro são obrigatórios). Confira o texto colado.';
+    status.textContent = 'Não consegui identificar todos os campos (data de abertura/inscrição, nome empresarial e logradouro são obrigatórios). Confira o texto colado.';
     status.className = 'status warn';
     return null;
   }
